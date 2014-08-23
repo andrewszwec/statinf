@@ -1,0 +1,367 @@
+# Statistical inference
+## Week 1 
+### Video 2
+__Prob density funcs__
+plot(x,y, lwd = 3, frame = FALSE, type = "l")
+
+__Beta Distribution__
+pbeta(0.75,2,1) 
+p <- in front of beta asks for probility
+
+pbeta(0.75,2,1)
+
+Cum Dist Func CDF 
+F(x) = P(X <= x)
+and Suvuval Functino
+F(x) = P(X > x)
+note: S(x) = 1-F(x) = 1 - x^2
+
+__Quantiles__
+F(x of alpha) = alpha
+where alpha = 95% of total pop
+
+qbeta(0.5,2,1)
+q in front of func density name gives you a quantile
+
+
+### Video 3
+Conditional Probability
+^ = intersect
+P(A|B) = P(A^B) / P(B)
+
+independant
+P(A|B) = P(A)P(B) / P(B)
+
+## Week 2
+### Video 1 - Variability
+
+```{r}
+nosim  <- 1000
+n <- 10
+# -- This code below creates a 1000 x 1000 matrix with normally 
+# -- distributed random variables. Then it takes the mean of  
+# -- each row of 1000 rand numbers and makes a tall vector.
+# -- Then it takes the standard deviation of the tall vector. 
+sd(apply(matrix(rnorm(nosim * n ), nosim), 1, mean))
+# These should be the same
+1/sqrt(n)
+```
+```{r}
+Poisson(4) have variance 4; means of random samples of n Poisson(4) have sd 2/sqrt(n)
+
+nosim <- 1000
+n <- 10
+sd(apply(matrix(rpois(nosim * n, 4), nosim), 1, mean))
+
+Var(X) = sigma^2 / n
+
+E[X] = sqrt(sigma^2) / sqrt(n)
+Var(X) = 4 = sigma^2 so...
+sqrt(4) / sqrt(n)
+
+```
+```{r}
+# Simulate Coin Flips
+Var(X) = 0.25
+E[X] = mean = sigma / (2*sqrt(n))
+
+nosim <- 1000
+n <- 10
+sd(apply(matrix(sample(0:1, nosim*n, replace = TRUE), nosim), 1, mean))
+
+# Get Mean
+1/(2*sqrt(n))
+
+
+
+```
+
+```{r}
+library(UsingR)
+data(father.son)
+x <- father.son$sheight
+n <- length(x)
+
+# Take a look at some information we know
+
+round(c(var(x), var(x)/n, sd(x), sd(x)/sqrt(n)),2)
+
+
+```
+
+#### Key take aways from Video 2
+- Sample Variance estimates the population variance
+- The Distribution of the sample variance is centered at what it is estimating
+- It get more conentrated around the population variance with large samples
+- Var(Xsample) = Var(Xpop) / n
+- Standard Error = Sqrt(Var(Xpop) / n)
+
+
+### Video 2
+#### E.g. 1 Website font changed to comic sans, brings in more revenue
+
+P(9 or 10 sites have more revenue) = 
+choose(10, 9)*0.5^9*(1-0.5)+choose(10, 10)*0.5^10*1 
+
+or
+
+pbinom(10/4*3, size=10, prob=0.5, lower.tail=FALSE     )
+
+__Q__
+Software company documentation errors
+pnorm(-3,mean=11,sd=2, lower.tail=TRUE)
+
+
+#### Poisson Distbn
+__Q__
+ppois(40, lambda=9*5)
+
+
+### Video 3 - Asymptotics
+__Q__
+P(H<=45) from 100 coin flips
+E[Xi] = 0.5 , Var(Xi) = 0.5(1-0.5)
+
+Std Err = sqrt(0.5*(1-0.5)/100)
+= 0.05
+
+(0.508-0.5)*2*sqrt(100)
+
+#### Confidence Intervals
+library(UsingR)
+data(father.son)
+x <- father.son$sheight
+(mean(x) + c(-1,1)*qnorm(0.975) * sd(x)/sqrt(length(x)))/12
+__Q__
+mean(x) + c(-1,1) * 2 * sd(x)/sqrt(length(x))
+
+__Useful Confidence Interval__
+binom.test(56,100)$conf.int
+
+__Nuclear Pump Failure__
+```{r}
+Poisson Distbn
+x <- 5
+t <- 94.32
+lambda <- x/t
+
+# Approx Poisson interval
+round(lambda + c(-1,1) * qnorm(0.975) * sqrt(lambda/t), 3)
+>> 0.007 0.099
+
+# Exact Poisson interval
+poisson.test(x, T=94.32)$conf
+
+```
+
+
+__Example__ 
+Search entries into website = 10 per min
+monitoring 1hr.
+Find Exact poisson interval for rate of events per minute?
+
+```{r}
+x <- 10
+t <- 60
+lambda <- x/t
+# Approx Poisson interval
+round(lambda + c(-1,1) * qnorm(0.975) * sqrt(lambda/t), 3)
+
+# Exact Poisson interval
+poisson.test(x, T=60)$conf
+
+```
+
+mu = 15
+sigma = 10 
+n = 100 
+
+
+
+
+
+
+
+#### Quiz 2
+__Q2__
+pnorm(70, mean=80, sd=10, lower.tail=TRUE)
+
+__Q3__
+1100+75*0.95
+
+qnorm(0.95, mean=1100, sd=75)
+
+__Q4__
+pnorm(1115,mean=998.36, sd=75, lower.tail=TRUE)
+
+__Q5__
+choose(5,4)*0.5^4*(1-0.5) + choose(5,5)*0.5^5*1
+
+__Q6__
+pnorm(16, mean=15, sd=10) - pnorm(14, mean=15, sd=10)
+
+__Q8__
+sqrt(1/12)
+
+__Q9__
+ppois(10, lambda = 5*3)
+
+__Q10__
+pbinom(2, size=1000, prob=0.5)
+
+## Week 3
+### Video 1 - t-Confidence Intervals
+
+```{r}
+#
+# Code to plot Normal Z distbn vs T-distbn (with funky manipulate slider)
+#
+require(manipulate)
+require(ggplot2)
+k <- 1000
+xvals <- seq(-5, 5, length=k)
+myplot <- function(df){
+      d <- data.frame(y=c(dnorm(xvals), dt(xvals, df)), 
+                        x=xvals, 
+                        dist = factor(rep(c("Normal","T"), c(k,k))))
+      g <- ggplot(d, aes(x=x, y=y))
+      g <- g+ geom_line(size=2, aes(colour =dist))
+      g
+}
+manipulate(myplot(mu), mu=slider(1,20, step=1))
+
+
+require(manipulate)
+require(ggplot2)
+pvals <- seq(.5, .99, by=.01)
+myplot2 <- function(df){
+      d <- data.frame(n=qnorm(pvals), t=qt(pvals, df), p=pvals)
+      
+      g <- ggplot(d, aes(x=n, y=t))
+      g <- g+geom_abline(size = 2, col = "lightblue") 
+      g <- g+ geom_line(size=2, col="black")
+      g <- g+ geom_vline(xintercept = qnorm(0,975))
+      g <- g+ geom_hline(yintercept = qt(0.975, df))
+      g
+}
+manipulate(myplot2(df), df=slider(1,20, step=1))
+
+```
+
+```{r}
+# Gosset's sleep data
+data(sleep)
+head(sleep)
+
+g1 <- sleep$extra[1:10]; g2 <- sleep$extra[11:20]
+difference  <- g2-g1
+mn <- mean(difference); s <- sd(difference); n <- 10
+
+# Confidence Interval df=n-1
+## All these methods give you the same results for confidence intervals
+mn+c(-1,1)*qt(.975, n-1) * s / sqrt(n)  # 1
+t.test(difference) # 2
+t.test(g2, g1, paired = TRUE) # 2
+t.test(extra ~ I(relevel(group, 2)), paired = TRUE, data = sleep) # 4
+
+
+```
+
+/*
+---
+title: ''your title here"
+author: "your name here"
+date: "your date here"
+output: 
+  pdf_document:
+    highlight: default
+    fig_width: 4
+    fig_height: 3
+fontsize: 11pt
+geometry: margin=0.20in
+---
+*/
+
+#### Confidence Intervals
+__Contraceptive example__
+```{r}
+n_OC = 8
+n_C = 21
+X_bar_OC = 132.86, S_OC = 15.34
+X_bar_C = 127.44, S_C = 18.23
+
+# Calculate using the pooled variance estimator:
+sp  <- sqrt((7 * 15.34^2 + 20 * 18.23^2) / (8 + 21 -2))
+# Now find the confidence interval
+132.86 - 127.44 + c(-1,1) * qt(0.975, 27) * sp * (1/8 + 1/21)^0.5
+
+```
+__ Mistakenly treating the sleep data as grouped__
+```{r}
+n1 <- length(g1); n2 <- length(g2)
+sp <- sqrt(((n1-1)*sd(x1)^2 + (n2-1) * sd(x2)^2) / (n1 + n2-2))
+md <- mean(g2) - mean(g1)
+semd <- sp * sqrt( 1 / n1 + 1/n2)
+rbind(
+      md + c(-1,1) * qt(.975, n1 + n2 - 2) * semd,
+      t.test(g2, g1, paired = FALSE, var.equal = TRUE)$conf,
+      t.test(g2, g1, paired = TRUE)$conf
+)
+
+```
+
+```{r}
+library(datasets); data(ChickWeight); library(reshape2)
+## define weight gain or loss
+wideCW  <- dcast(ChickWeight, Diet + Chick ~ Time, value.var = "weight")
+names(wideCW)[-(1:2)]  <- paste("time", names(wideCW)[-(1:2)], sep ="")
+require("dplyr")
+wideCW  <- mutate(wideCW, 
+      gain = time21 - time0                  
+)
+
+## Consider using a violin plot?? to plot gains
+
+# Let's do a t interval
+# assumption: not sure if vairances are equal or unequal, so lets do both (paired option below)
+wideCW14  <- subset(wideCW, Diet %in% c(1,4))
+rbind(
+      t.test(gain ~ Diet, paired = FALSE, var.equal = TRUE, data = wideCW14)$conf,
+      t.test(gain ~ Diet, paired = FALSE, var.equal = FALSE, data = wideCW14)$conf
+)
+
+```
+
+__Example__
+Comparing SBP for 8 oral contraceptives and 21 controls
+```{r}
+n_OC = 8
+n_C = 21
+X_bar_OC = 132.86, S_OC = 15.34
+X_bar_C = 127.44, S_C = 18.23
+
+df = 15.04  ## Calculated by a huge degrees of freedom calculation
+t_1504_0975 = 2.13
+
+# Now calculate the ~95% Confidence interval for this experiment
+
+132.86 - 127.44 + c(-1,1) * 2.13 * sqrt(15.34^2 / 8 + 18.23^2 / 21)
+
+# Using R functions
+
+t.test(...., var.equal= FALSE)
+
+
+```
+
+### Video 2 - Week 3
+Hypothesis testing
+H0 
+
+
+
+
+
+
+
+
