@@ -1,0 +1,117 @@
+---
+title: "Statistical Inference Course Project: PART 1"
+output: pdf_document
+---
+
+# 1. Simulation Exercise
+
+```{r echo=FALSE}
+# Do 1000 simulations of 40 x Exponetials
+# 
+# Run and plot the simulation and explain the properties of the distribution
+# 1. Show where the distribution is centered at and compare it to the theoretical center of the distribution.
+# 2. Show how variable it is and compare it to the theoretical variance of the distribution.
+# 3. Show that the distribution is approximately normal.
+# 4. Evaluate the coverage of the confidence interval for 1/lambda: X¯±1.96Sn. (This only needs to be done for the specific value of lambda). 
+
+
+# Exponential Distribution
+set.seed(1234)
+lambda = 0.2
+actualMean = 1/lambda
+actualstdDev = 1/lambda
+actualVariance = actualstdDev^2
+n = 40
+nosim  <- 1000
+
+# -- This code below creates a 1000 x 40 matrix with 40,000 exponentially 
+# -- distributed random variables. Then it takes the mean of  
+# -- each row of 1000 rand numbers and makes a tall vector.
+
+mydata <- matrix(rexp(nosim * n, lambda) , nosim) 
+distbnOfMeans <- apply(mydata, 1, mean)
+# Distribution is centred at
+meanOfSamples <- mean(distbnOfMeans)
+# Standard Deviation of Means
+stdDevOfSampleMean <- sd(distbnOfMeans)
+
+# Optional
+stdDevOfSampleStd <- sd(apply(mydata, 1, sd))
+
+# Mean Standard Deviation of Sample
+meanOfSampleStd  <- mean(apply(mydata, 1, sd))
+varianceOfSample <- meanOfSampleStd^2
+```
+
+1. Show where the distribution is centered at and compare it to the theoretical center of the distribution
+```{r echo=FALSE}
+rbind(
+      c(1, 'Theoretical Centre of distribution', actualMean)
+      ,c(1, 'Centre of Simulation Distribution' , meanOfSamples)
+)
+```
+
+2. Show how variable it is and compare it to the theoretical variance of the distribution.
+```{r echo=FALSE}
+rbind(
+      c(2, 'Theoretical Variance of Distribution', actualVariance )
+      ,c(2, 'Vairance of Simulation Distribution', varianceOfSample)
+)
+```
+
+3. Show that the distribution is approximately normal.
+See image below: This shows the distribution of means of the 1000 sample 
+Simulations is approximately normally distributed
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+# hist(distbnOfMeans)
+distbnOfMeansDf <- data.frame(distbnOfMeans)
+
+require(ggplot2)
+# m <- ggplot(distbnOfMeansDf, aes(x=distbnOfMeans) )
+# m + geom_histogram(colour = "darkblue", fill = "white", binwidth = 0.08) + ggtitle('Distribution of Means of Simulations') + xlab('Means of Simulations')+ ylab('Count')
+
+
+m <- ggplot(distbnOfMeansDf, aes(x = distbnOfMeans))
+m <- m + geom_histogram(aes(y = ..density..), binwidth = .08 ,color="black", fill="white")
+m <- m + geom_density(alpha=.2, fill="red", aes(colour="Simulated"))
+m <- m + stat_function(fun = dnorm, arg = list(mean = 5, sd = 5/sqrt(40)), geom='area', alpha=.2, fill="blue", aes(colour="Normal"))
+m <- m + scale_colour_manual("Density", values=c( "blue", "red"))
+m <- m + scale_x_continuous(breaks = 2:9) 
+m <- m + scale_y_continuous(name = "Density")
+m <- m + geom_vline(data=distbnOfMeansDf, aes(xintercept=meanOfSamples,  colour= "Simulated"),
+                 linetype="dashed", size=1)
+m <- m + geom_vline(data=distbnOfMeansDf, aes(xintercept=5,  colour= "Normal"),
+                linetype="dashed", size=1)
+m <- m + theme(legend.position=c(.88, .78), 
+           legend.text = element_text(size = 10, colour = "black"), 
+           axis.text.x = element_text(size=15),
+           axis.text.y = element_text(size=15),
+           axis.title=element_text(size=20,face="bold"),
+           plot.title = element_text(size=20, face="bold"))
+m <- m + ggtitle('Distribution of Means of Simulations') + xlab('Means of Simulations')+ ylab('Density')
+m
+```
+
+4. Evaluate the coverage of the confidence interval    
+```{r echo=FALSE}
+CI <- meanOfSamples + c(-1, 1) * 1.96 * meanOfSampleStd / sqrt(length(distbnOfMeans)) 
+```
+__Confidence Interval__ 
+```{r echo=FALSE}
+CI
+```
+__Confidence Interval Coverage__ 
+```{r echo=FALSE}
+# CI = 4.702276 5.302208
+pnorm(5.302208, mean = meanOfSamples, sd = meanOfSampleStd, lower.tail = TRUE) - pnorm(4.702276, mean = meanOfSamples, sd = meanOfSampleStd, lower.tail = TRUE)
+# 0.04942181 ~ 5%
+
+
+## Tips
+# Mean of each of 1000 simulations 
+# sd of each of 1000 simulations
+
+```
+

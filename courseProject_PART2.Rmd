@@ -1,0 +1,256 @@
+---
+title: "Statistical Inference Course Project: PART 2"
+output: pdf_document
+---
+
+# 2. Basic Inferential Data Analysis
+```{r echo=FALSE}
+# 1. Load the ToothGrowth data and perform some basic exploratory data analyses 
+# 2. Provide a basic summary of the data.
+# 3. Use confidence intervals and hypothesis tests to compare tooth growth by supp and dose. (Use the  techniques from class even if theres other approaches worth considering)
+# 4. State your conclusions and the assumptions needed for your conclusions. 
+
+```
+
+## 1. Basic Exploratory Analysis and Summary of Data
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+require(data.table)
+library(datasets); data(ToothGrowth);
+dt <- data.table(ToothGrowth)
+```
+The Tooth Growth data contains 60 records including the dose, supplement given and length of tooth in a guinea pig for an experiement. There are two types of supplement; VC and OJ each with 30 trials. There are 3 types of doses; 0.5, 1.0 and 2.0mg, each with 20 trials.
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+require(ggplot2)
+##summary(ToothGrowth)
+```
+
+### Supplements Summary Table
+```{r echo=FALSE}
+dt[, list(meanLength=mean(len), sdLength=sd(len)), by = supp]
+#    supp meanLength sdLength
+# 1:   VC   16.96333 8.266029
+# 2:   OJ   20.66333 6.605561
+```
+### Doses Summary Table
+```{r echo=FALSE}
+dt[, list(meanLength=mean(len), sdLength=sd(len)), by = dose]
+#    dose meanLength sdLength
+# 1:  0.5     10.605 4.499763
+# 2:  1.0     19.735 4.415436
+# 3:  2.0     26.100 3.774150
+```
+
+## 3. Use Confidence Intervals and Hypothesis Tests to compare tooth growth by supplement and dose
+__Comparing by Supp__  
+Independent t confidence interval for OJ - VC
+```{r echo=FALSE}
+###############
+# Paired
+###############
+# Y
+n_OJ = 30
+X_OJ = 20.66333
+s_OJ = 6.605561
+
+# X
+n_VC = 30
+X_VC = 16.96333
+s_VC = 8.266029
+
+alpha = 0.05
+
+degfree = n_OJ + n_VC - 2
+
+Sp = sqrt( ( (n_VC - 1) * s_VC^2 + (n_OJ - 1) * s_OJ^2 ) /  degfree )
+
+# t for 95%
+round(X_OJ - X_VC + c(-1,1) * qt(1 - alpha/2, degfree) * Sp * sqrt(1/n_VC + 1/n_OJ), 2)
+
+# CI = -0.17,  7.57
+# Most of the time the OJ out-performs the VC with 95% confidence
+
+```
+Most of the time the OJ out performs the VC with 95% confidence
+
+
+__Comparing by Dose__
+```{r echo=FALSE}
+# dt[, list(meanLength=mean(len), sdLength=sd(len)), by = dose]
+#    dose meanLength sdLength
+# 1:  0.5     10.605 4.499763
+# 2:  1.0     19.735 4.415436
+# 3:  2.0     26.100 3.774150
+
+# X
+n_05 = 20
+X_05 = 10.605
+s_05 = 4.499763
+
+# Y
+n_10 = 20
+X_10 = 19.735
+s_10 = 4.415436
+
+# Z
+n_20 = 20
+X_20 = 26.100
+s_20 = 3.774150
+
+# 95% CI
+alpha = 0.05
+
+## Compare 0.5 vs 1.0 
+degfree = n_10 + n_05 - 2
+
+Sp = sqrt( ( (n_05 - 1) * s_05^2 + (n_10 - 1) * s_10^2 ) /  degfree )
+```
+Independent t confidence interval comparing doses 0.5 vs 1.0 milligrams
+```{r echo=FALSE}
+# t for 95%
+round(X_10 - X_05 + c(-1,1) * qt(1 - alpha/2, degfree) * Sp * sqrt(1/n_05 + 1/n_10), 2)
+
+# CI = 6.28 11.98
+# Dose of 1.0 always out performs does of 0.5 in stimulating tooth growth with 95% confidence
+```
+Dose of 1.0 always out performs does of 0.5 in stimulating tooth growth with 95% confidence
+
+```{r echo=FALSE}
+
+## Compare 0.5 vs 2.0 
+degfree = n_20 + n_05 - 2
+
+Sp = sqrt( ( (n_05 - 1) * s_05^2 + (n_20 - 1) * s_20^2 ) /  degfree )
+```
+Independent t confidence interval comparing doses 0.5 vs 2.0 milligrams
+```{r echo=FALSE}
+# t for 95%
+round(X_20 - X_05 + c(-1,1) * qt(1 - alpha/2, degfree) * Sp * sqrt(1/n_05 + 1/n_20), 2)
+
+# CI = 12.84 18.15
+# Dose of 2.0 always out performs does of 0.5 in stimulating tooth growth with 95% confidence
+```
+Dose of 2.0 always out performs does of 0.5 in stimulating tooth growth with 95% confidence
+
+```{r echo=FALSE}
+## Compare 1.0 vs 2.0 
+degfree = n_20 + n_10 - 2
+
+Sp = sqrt( ( (n_10 - 1) * s_10^2 + (n_20 - 1) * s_20^2 ) /  degfree )
+```
+Independent t confidence interval comparing doses 2.0 vs 1.0 milligrams
+```{r echo=FALSE}
+# t for 95%
+round(X_20 - X_10 + c(-1,1) * qt(1 - alpha/2, degfree) * Sp * sqrt(1/n_10 + 1/n_20), 2)
+
+# CI = 3.74 8.99
+# Dose of 2.0 always out performs does of 1.0 in stimulating tooth growth with 95% confidence
+text1 = 'Dose of 1.0 always out performs does of 0.5 in stimulating tooth growth with 95% confidence'
+text2 = 'Dose of 2.0 always out performs does of 0.5 in stimulating tooth growth with 95% confidence'
+text3 = 'Dose of 2.0 always out performs does of 1.0 in stimulating tooth growth with 95% confidence'
+```
+Dose of 2.0 always out performs does of 1.0 in stimulating tooth growth with 95% confidence
+  
+            
+### b) Hypothesis Test
+__Comparing by Supp__
+```{r echo=FALSE}
+## H0 = VC is a better supplement that OJ
+## Ha = OJ is better
+## If p-value > 0.05 then reject H0. Therefore OJ is a better supplement than VC
+
+
+t.test(dt[supp=='OJ']$len , dt[supp=='VC']$len, paired = FALSE, var.equal = FALSE)
+# Alternative notation
+# t.test(len ~ supp, paired = FALSE, var.equal = FALSE, data=dt)
+
+# Welch Two Sample t-test
+# 
+# data:  dt[supp == "OJ"]$len and dt[supp == "VC"]$len
+# t = 1.9153, df = 55.309, p-value = 0.06063
+# alternative hypothesis: true difference in means is not equal to 0
+# 95 percent confidence interval:
+#  -0.1710156  7.5710156
+# sample estimates:
+# mean of x mean of y 
+#  20.66333  16.96333 
+
+```
+
+__Comparing by Dose__
+```{r echo=FALSE}
+## 0.5 vs 1.0
+## H0 = dose 1.0
+## Ha = dose 0.5
+## if p-value < 0.05 then fail to reject H0. Therefore dose 1.0 is better than 0.5
+t.test(dt[dose==0.5]$len , dt[dose==1.0]$len, paired = FALSE, var.equal = FALSE)
+#       Welch Two Sample t-test
+# 
+# data:  dt[dose == 0.5]$len and dt[dose == 1]$len
+# t = -6.4766, df = 37.986, p-value = 1.268e-07
+# alternative hypothesis: true difference in means is not equal to 0
+# 95 percent confidence interval:
+#  -11.983781  -6.276219
+# sample estimates:
+# mean of x mean of y 
+#    10.605    19.735 
+
+## 0.5 vs 2.0
+t.test(dt[dose==0.5]$len , dt[dose==2.0]$len, paired = FALSE, var.equal = FALSE)
+
+#       Welch Two Sample t-test
+# 
+# data:  dt[dose == 0.5]$len and dt[dose == 2]$len
+# t = -11.799, df = 36.883, p-value = 4.398e-14
+# alternative hypothesis: true difference in means is not equal to 0
+# 95 percent confidence interval:
+#  -18.15617 -12.83383
+# sample estimates:
+# mean of x mean of y 
+#    10.605    26.100 
+
+## 1.5 vs 2.0
+t.test(dt[dose==1.0]$len , dt[dose==2.0]$len, paired = FALSE, var.equal = FALSE)
+#       Welch Two Sample t-test
+# 
+# data:  dt[dose == 1]$len and dt[dose == 2]$len
+# t = -4.9005, df = 37.101, p-value = 1.906e-05
+# alternative hypothesis: true difference in means is not equal to 0
+# 95 percent confidence interval:
+#  -8.996481 -3.733519
+# sample estimates:
+# mean of x mean of y 
+#    19.735    26.100 
+
+
+```
+
+## 4. Conclusions and Assumptions 
+### Conclusions
+1. Most of the time the OJ out performs the VC with 95% confidence
+2. Dose of 1.0 always out performs does of 0.5 in stimulating tooth growth with 95% confidence
+3. Dose of 2.0 always out performs does of 0.5 in stimulating tooth growth with 95% confidence
+4. Dose of 2.0 always out performs does of 1.0 in stimulating tooth growth with 95% confidence
+
+### Assumptions
+1. T distribution is used as data may not be normally distributed
+2. Assume unequal variances for t distribution confidence interval
+3. Assume the Central Limit Theorm
+4. n must be large enough to be statistically signifcant
+5. Since n is small for each set of tests use Gossett's T test
+6. Assuming a constant variance between groups of Guinea Pigs receiving difference amounts of treatment and different supplements 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

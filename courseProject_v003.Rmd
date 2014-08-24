@@ -133,32 +133,22 @@ require(data.table)
 library(datasets); data(ToothGrowth);
 dt <- data.table(ToothGrowth)
 ```
-### Types of Supplement
-```{r echo=FALSE}
-unique(dt$supp)
-```
 
-### Doses Used in Trial
-```{r echo=FALSE}
-unique(dt$dose)
-```
-### Number of Each Supp
-```{r echo=FALSE}
-nrow(dt[ dt$supp == 'OJ' ])
-nrow(dt[ dt$supp == 'VC' ])
-```
-### Number of Each Dose
-```{r echo=FALSE}
-nrow(dt[ dt$dose == 0.5 ])
-nrow(dt[ dt$dose == 1.0 ])
-nrow(dt[ dt$dose == 2.0 ])
+Type of Supp  | Number Trials
+:-------------: | :-------------:
+VC  | 30
+OJ  | 30
 
-```
+Dose (milligrams)  | Number Trials
+:-------------: | :-------------:
+0.5 | 20
+1.0 | 20
+2.0 | 20
 
 ## 2. Basic Summary of Data
 ```{r echo=FALSE}
 require(ggplot2)
-summary(ToothGrowth)
+##summary(ToothGrowth)
 ```
 
 ### Supplements and Doses Summary Table
@@ -197,40 +187,8 @@ ggplot(dt, aes(len) ) + geom_histogram() + facet_wrap(supp ~ dose)
 
 ### a) Confidence Intervals
 
-__Comparing by Supp__
-### What is 95% CI for the Mean length using VC?
-```{r echo=FALSE}
-# dt[, list(meanLength=mean(len), sdLength=sd(len)), by = supp]
-#    supp meanLength sdLength
-# 1:   VC   16.96333 8.266029
-# 2:   OJ   20.66333 6.605561
-
-###############
-# Individually
-###############
-n_VC = 30
-X_VC = 16.96333
-s_VC = 8.266029
-degfree = n-1      
-
-# X_bar +/- tn-1 * s / sqrt(n)
-round(X_VC + c(-1,1) * qt(0.975, degfree) * s_VC / sqrt(n_VC))
-# CI = 13, 20
-
-```
-### What is 95% CI for the Mean length using OJ?
-```{r echo=FALSE}
-n_OJ = 30
-X_OJ = 20.66333
-s_OJ = 6.605561
-degfree = n-1      
-
-# X_bar +/- tn-1 * s / sqrt(n)
-round(X_VC + c(-1,1) * qt(0.975, degfree) * s_VC / sqrt(n_VC))
-# CI = 18, 23
-
-```
-### Independent t confidence interval for OJ - VC
+__Comparing by Supp__  
+Independent t confidence interval for OJ - VC
 ```{r echo=FALSE}
 ###############
 # Paired
@@ -433,15 +391,17 @@ t.test(dt[dose==1.0]$len , dt[dose==2.0]$len, paired = FALSE, var.equal = FALSE)
 
 ## 4. Conclusions and Assumptions 
 ### Conclusions
-1. Some Conculsions
-
+1. Most of the time the OJ out performs the VC with 95% confidence
+2. Dose of 1.0 always out performs does of 0.5 in stimulating tooth growth with 95% confidence
+3. Dose of 2.0 always out performs does of 0.5 in stimulating tooth growth with 95% confidence
+4. Dose of 2.0 always out performs does of 1.0 in stimulating tooth growth with 95% confidence
 
 ### Assumptions
-1. Use t interval as not sure if data is normally distributed
+1. T distribution is used as data may not be normally distributed
 2. Assume unequal variances for t distribution confidence interval
-3. Central limit theorm for Z test
+3. Assume the Central Limit Theorm
 4. n must be large enough to be statistically signifcant
-5. If n is small then Gossett's T test is used, n is small for each set of tests so use t test
+5. Since n is small for each set of tests use Gossett's T test
 6. Assuming a constant variance between groups of Guinea Pigs receiving difference amounts of treatment and different supplements 
 
 
