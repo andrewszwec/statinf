@@ -1,21 +1,22 @@
 ---
 title: "Statistical Inference Course Project"
 author: "Andrew Szwec"
-date: "23 August 2014"
+date: "24 August 2014"
 output: pdf_document
 ---
 
 # 1. Simulation Exercise
 
-Do 1000 simulations of 40 x Exponetials
+```{r echo=FALSE}
+# Do 1000 simulations of 40 x Exponetials
+# 
+# Run and plot the simulation and explain the properties of the distribution
+# 1. Show where the distribution is centered at and compare it to the theoretical center of the distribution.
+# 2. Show how variable it is and compare it to the theoretical variance of the distribution.
+# 3. Show that the distribution is approximately normal.
+# 4. Evaluate the coverage of the confidence interval for 1/lambda: X¯±1.96Sn. (This only needs to be done for the specific value of lambda). 
 
-Run and plot the simulation and explain the properties of the distribution
-1. Show where the distribution is centered at and compare it to the theoretical center of the distribution.
-2. Show how variable it is and compare it to the theoretical variance of the distribution.
-3. Show that the distribution is approximately normal.
-4. Evaluate the coverage of the confidence interval for 1/lambda: X¯±1.96Sn. (This only needs to be done for the specific value of lambda). 
 
-```{r}
 # Exponential Distribution
 set.seed(1234)
 lambda = 0.2
@@ -42,18 +43,31 @@ stdDevOfSampleStd <- sd(apply(mydata, 1, sd))
 # Mean Standard Deviation of Sample
 meanOfSampleStd  <- mean(apply(mydata, 1, sd))
 varianceOfSample <- meanOfSampleStd^2
+```
 
+1. Show where the distribution is centered at and compare it to the theoretical center of the distribution
+```{r}
 rbind(
       c(1, 'Theoretical Centre of distribution', actualMean)
       ,c(1, 'Centre of Simulation Distribution' , meanOfSamples)
-      ,c(2, 'Theoretical Variance of Distribution', actualVariance )
+)
+```
+
+2. Show how variable it is and compare it to the theoretical variance of the distribution.
+```{r}
+rbind(
+      c(2, 'Theoretical Variance of Distribution', actualVariance )
       ,c(2, 'Vairance of Simulation Distribution', varianceOfSample)
 )
+```
 
-# See image below: This shows the distribution of means of the 1000 sample 
-# Simulations is approximately normally distributed
-hist(distbnOfMeans)
+3. Show that the distribution is approximately normal.
+See image below: This shows the distribution of means of the 1000 sample 
+Simulations is approximately normally distributed
 
+
+```{r}
+# hist(distbnOfMeans)
 distbnOfMeansDf <- data.frame(distbnOfMeans)
 
 require(ggplot2)
@@ -72,7 +86,7 @@ m <- m + geom_vline(data=distbnOfMeansDf, aes(xintercept=meanOfSamples,  colour=
                  linetype="dashed", size=1)
 m <- m + geom_vline(data=distbnOfMeansDf, aes(xintercept=5,  colour= "Normal"),
                 linetype="dashed", size=1)
-m <- m + theme(legend.position=c(.88, .78), legend.key.size = unit(1.5, "cm"), 
+m <- m + theme(legend.position=c(.88, .78), 
            legend.text = element_text(size = 10, colour = "black"), 
            axis.text.x = element_text(size=15),
            axis.text.y = element_text(size=15),
@@ -80,23 +94,24 @@ m <- m + theme(legend.position=c(.88, .78), legend.key.size = unit(1.5, "cm"),
            plot.title = element_text(size=20, face="bold"))
 m <- m + ggtitle('Distribution of Means of Simulations') + xlab('Means of Simulations')+ ylab('Density')
 m
+```
 
-# Confidence Interval
-# Std Dev = 1/lambda, Mean = 1/lambda
-# X_sample +/- 1.96 * S / sqrt(n)
-
+4. Evaluate the coverage of the confidence interval for 1/lambda: X¯±1.96Sn. (This only needs to be done for the specific value of lambda). 
+__Confidence Interval__
+Std Dev = 1/lambda, Mean = 1/lambda
+X_sample +/- 1.96 * S / sqrt(n)
+```{r}
 CI <- meanOfSamples + c(-1, 1) * 1.96 * meanOfSampleStd / sqrt(length(distbnOfMeans)) 
+CI
 
 # CI = 4.702276 5.302208
 pnorm(5.302208, mean = meanOfSamples, sd = meanOfSampleStd, lower.tail = TRUE) - pnorm(4.702276, mean = meanOfSamples, sd = meanOfSampleStd, lower.tail = TRUE)
 # 0.04942181 ~ 5%
 
+
 ## Tips
 # Mean of each of 1000 simulations 
 # sd of each of 1000 simulations
-
-
-
 
 ```
 
@@ -105,10 +120,10 @@ pnorm(5.302208, mean = meanOfSamples, sd = meanOfSampleStd, lower.tail = TRUE) -
 
 # 2. Basic Inferential Data Analysis
 
-Load the ToothGrowth data and perform some basic exploratory data analyses 
-Provide a basic summary of the data.
-Use confidence intervals and hypothesis tests to compare tooth growth by supp and dose. (Use the techniques from class even if there's other approaches worth considering)
-State your conclusions and the assumptions needed for your conclusions. 
+1. Load the ToothGrowth data and perform some basic exploratory data analyses 
+2. Provide a basic summary of the data.
+3. Use confidence intervals and hypothesis tests to compare tooth growth by supp and dose. (Use the  techniques from class even if there's other approaches worth considering)
+4. State your conclusions and the assumptions needed for your conclusions. 
 
 
 ## 1. Load the Tooth Growth Dataset & Basic Exploratory Analysis
@@ -116,16 +131,23 @@ State your conclusions and the assumptions needed for your conclusions.
 require(data.table)
 library(datasets); data(ToothGrowth);
 dt <- data.table(ToothGrowth)
-# Types of Supplement 
+```
+### Types of Supplement
+```{r}
 unique(dt$supp)
-# Doses Used in Trial
-unique(dt$dose)
+```
 
-# Number of Each Supp
+### Doses Used in Trial
+```{r}
+unique(dt$dose)
+```
+### Number of Each Supp
+```{r}
 nrow(dt[ dt$supp == 'OJ' ])
 nrow(dt[ dt$supp == 'VC' ])
-
-# Number of Each Dose
+```
+### Number of Each Dose
+```{r}
 nrow(dt[ dt$dose == 0.5 ])
 nrow(dt[ dt$dose == 1.0 ])
 nrow(dt[ dt$dose == 2.0 ])
@@ -136,6 +158,10 @@ nrow(dt[ dt$dose == 2.0 ])
 ```{r}
 require(ggplot2)
 summary(ToothGrowth)
+```
+
+### Supplements and Doses Summary Table
+```{r}
 dt[, list(meanLength=mean(len), sdLength=sd(len)), by = c('supp', 'dose')]
 
 #    supp dose meanLength sdLength
@@ -145,9 +171,24 @@ dt[, list(meanLength=mean(len), sdLength=sd(len)), by = c('supp', 'dose')]
 # 4:   OJ  0.5      13.23 4.459709
 # 5:   OJ  1.0      22.70 3.910953
 # 6:   OJ  2.0      26.06 2.655058
-
-
-
+```
+### Supplements Summary Table
+```{r}
+dt[, list(meanLength=mean(len), sdLength=sd(len)), by = supp]
+#    supp meanLength sdLength
+# 1:   VC   16.96333 8.266029
+# 2:   OJ   20.66333 6.605561
+```
+### Doses Summary Table
+```{r}
+dt[, list(meanLength=mean(len), sdLength=sd(len)), by = dose]
+#    dose meanLength sdLength
+# 1:  0.5     10.605 4.499763
+# 2:  1.0     19.735 4.415436
+# 3:  2.0     26.100 3.774150
+```
+### Graphical Summary of Supplements and Doses
+```{r}
 ggplot(dt, aes(len) ) + geom_histogram() + facet_wrap(supp ~ dose)
 ```
 
@@ -157,37 +198,144 @@ ggplot(dt, aes(len) ) + geom_histogram() + facet_wrap(supp ~ dose)
 
 __Comparing by Supp__
 ```{r}
-dt[, list(meanLength=mean(len), sdLength=sd(len)), by = supp]
+# dt[, list(meanLength=mean(len), sdLength=sd(len)), by = supp]
 #    supp meanLength sdLength
 # 1:   VC   16.96333 8.266029
 # 2:   OJ   20.66333 6.605561
 
-
-OJ_mean = 20.66333
-OJ_sd = 6.605561
-OJ_n = 30
-
-VC_mean = 16.96333
-VC_sd = 8.266029
-VC_n = 30
-
-t_df  <- ( (VC_sd^2 / VC_n) + (OJ_sd^2 / OJ_n) )^2 / ( (VC_sd^2 / VC_n)^2 / (VC_n - 1) + (OJ_sd^2 / OJ_n)^2 / (OJ_n - 1) )
-
-OJ_mean - VC_mean + c(-1,1) * t_df * sqrt( (VC_sd^2 / VC_n) + (OJ_sd^2 / OJ_n)  )
-
-# 95% Confidence Interval is...
-# -103.1492  110.5492
+###############
+# Individually
+###############
+n_VC = 30
+X_VC = 16.96333
+s_VC = 8.266029
+degfree = n-1      
 
 ```
+### What is 95% CI for the Mean length using VC?
+```{r}
+# X_bar +/- tn-1 * s / sqrt(n)
+round(X_VC + c(-1,1) * qt(0.975, degfree) * s_VC / sqrt(n_VC))
+# CI = 13, 20
+
+n_OJ = 30
+X_OJ = 20.66333
+s_OJ = 6.605561
+degfree = n-1      
+
+```
+### What is 95% CI for the Mean length using OJ?
+```{r}
+# X_bar +/- tn-1 * s / sqrt(n)
+round(X_VC + c(-1,1) * qt(0.975, degfree) * s_VC / sqrt(n_VC))
+# CI = 18, 23
+
+
+###############
+# Paired
+###############
+# Y
+n_OJ = 30
+X_OJ = 20.66333
+s_OJ = 6.605561
+
+# X
+n_VC = 30
+X_VC = 16.96333
+s_VC = 8.266029
+
+alpha = 0.05
+
+degfree = n_OJ + n_VC - 2
+
+Sp = sqrt( ( (n_VC - 1) * s_VC^2 + (n_OJ - 1) * s_OJ^2 ) /  degfree )
+```
+### Independent t confidence interval for OJ - VC
+```{r}
+# t for 95%
+round(X_OJ - X_VC + c(-1,1) * qt(1 - alpha/2, degfree) * Sp * sqrt(1/n_VC + 1/n_OJ), 2)
+
+# CI = -0.17,  7.57
+# Most of the time the OJ out-performs the VC with 95% confidence
+
+```
+Most of the time the OJ out performs the VC with 95% confidence
+
 
 __Comparing by Dose__
 ```{r}
-dt[, list(meanLength=mean(len), sdLength=sd(len)), by = dose]
+# dt[, list(meanLength=mean(len), sdLength=sd(len)), by = dose]
 #    dose meanLength sdLength
 # 1:  0.5     10.605 4.499763
 # 2:  1.0     19.735 4.415436
 # 3:  2.0     26.100 3.774150
+
+# X
+n_05 = 20
+X_05 = 10.605
+s_05 = 4.499763
+
+# Y
+n_10 = 20
+X_10 = 19.735
+s_10 = 4.415436
+
+# Z
+n_20 = 20
+X_20 = 26.100
+s_20 = 3.774150
+
+# 95% CI
+alpha = 0.05
+
+## Compare 0.5 vs 1.0 
+degfree = n_10 + n_05 - 2
+
+Sp = sqrt( ( (n_05 - 1) * s_05^2 + (n_10 - 1) * s_10^2 ) /  degfree )
 ```
+### Independent t confidence interval comparing doses 0.5 vs 1.0 milligrams
+```{r}
+# t for 95%
+round(X_10 - X_05 + c(-1,1) * qt(1 - alpha/2, degfree) * Sp * sqrt(1/n_05 + 1/n_10), 2)
+
+# CI = 6.28 11.98
+# Dose of 1.0 always out performs does of 0.5 in stimulating tooth growth with 95% confidence
+```
+Dose of 1.0 always out performs does of 0.5 in stimulating tooth growth with 95% confidence
+
+```{r}
+
+## Compare 0.5 vs 2.0 
+degfree = n_20 + n_05 - 2
+
+Sp = sqrt( ( (n_05 - 1) * s_05^2 + (n_20 - 1) * s_20^2 ) /  degfree )
+```
+### Independent t confidence interval comparing doses 0.5 vs 2.0 milligrams
+```{r}
+# t for 95%
+round(X_20 - X_05 + c(-1,1) * qt(1 - alpha/2, degfree) * Sp * sqrt(1/n_05 + 1/n_20), 2)
+
+# CI = 12.84 18.15
+# Dose of 2.0 always out performs does of 0.5 in stimulating tooth growth with 95% confidence
+```
+Dose of 2.0 always out performs does of 0.5 in stimulating tooth growth with 95% confidence
+
+```{r}
+## Compare 1.0 vs 2.0 
+degfree = n_20 + n_10 - 2
+
+Sp = sqrt( ( (n_10 - 1) * s_10^2 + (n_20 - 1) * s_20^2 ) /  degfree )
+```
+### Independent t confidence interval comparing doses 2.0 vs 1.0 milligrams
+```{r}
+# t for 95%
+round(X_20 - X_10 + c(-1,1) * qt(1 - alpha/2, degfree) * Sp * sqrt(1/n_10 + 1/n_20), 2)
+
+# CI = 3.74 8.99
+# Dose of 2.0 always out performs does of 1.0 in stimulating tooth growth with 95% confidence
+```
+Dose of 2.0 always out performs does of 1.0 in stimulating tooth growth with 95% confidence
+
 
 ### b) Hypothesis Test
 __Comparing by Supp__
@@ -296,10 +444,8 @@ t.test(dt[dose==1.0]$len , dt[dose==2.0]$len, paired = FALSE, var.equal = FALSE)
 
 ## 4. Conclusions and Assumptions 
 ### Conclusions
-1.
-2.
-3.
-4.
+1. Some Conculsions
+
 
 ### Assumptions
 1. Use t interval as not sure if data is normally distributed

@@ -356,7 +356,170 @@ t.test(...., var.equal= FALSE)
 
 ### Video 2 - Week 3
 Hypothesis testing
-H0 
+
+The probability if rejecting the null hypothesis when it is false is called the power
+Power is used to calculate the sample size for experiments
+
+__T- Test in R__
+library(UsingR); 
+data(father.son) t.test(father.son$sheight - father.son$fheight)
+
+
+__Chicken Weigth - Unequal Variance T-Test on Diets 1 & 4__
+library(datasets); data(ChickWeight); library(reshape2)
+
+##define weight gain or loss
+wideCW <- dcast(ChickWeight, Diet + Chick ~ Time, value.var = "weight") 
+names(wideCW)[-(1 : 2)] <- paste("time", names(wideCW)[-(1 : 2)], sep = "") 
+
+library(dplyr)
+wideCW <- mutate(wideCW, gain = time21 - time0 )
+
+wideCW14 <- subset(wideCW, Diet %in% c(1, 4)) 
+t.test(gain ~ Diet, paired = FALSE, var.equal = FALSE, data = wideCW14)
+
+
+
+### Quiz Week 3
+```{r}
+
+## Q1
+n = 9
+X_bar = 1100
+s = 30
+mu = 
+degfree = n-1      
+#3 What is 95% CI for the mean brain volume?
+
+# X_bar +/- tn-1 * s / sqrt(n)
+round(X_bar + c(-1,1) * qt(0.975, degfree) * s / sqrt(n))
+
+## Q2
+n = 9
+t = 6 wks
+X_bar = -2 
+# s = ?
+# CI = 95%
+degfree = n-1
+upperLimit = 0
+# lowerLimit = ?
+
+# upperlimit = X_bar +/- tn-1 * s / sqrt(n)
+# rearranging
+
+s = ( (upperLimit - X_bar) * sqrt(n) ) / qt(0.975, degfree)
+s
+
+## Q3 
+# 
+# Paired interval since in the chicken example there were 2 diets 
+# and 2 separate groups of chickens. This was not a paired study. 
+# With the runners, the same runners were tested twice each on different 
+# supplements so the runner is common amongst both tests. 
+
+
+## Q4
+n = 20 
+10 nights new and 10 nights old
+Nightly median waiting time = MWT
+
+# Y
+MWT_new = 3
+var_new = 0.6
+n_new = 10
+
+# X
+MWT_old = 5
+var_old = 0.68
+n_old = 10
+alpha = 0.05
+
+degfree = n_new + n_old - 2
+
+Sp = sqrt( 
+            ( (n_old - 1) * var_old + (n_new - 1) * var_new ) /  degfree     
+)
+
+# t for 95%
+round(MWT_new - MWT_old + c(-1,1) * qt(1 - alpha/2, degfree) * Sp * sqrt(1/n_old + 1/n_new), 2)
+
+
+## Q5
+Interval will be narrower
+
+## Q6
+# Y
+MWT_new = 4
+s_new = 0.5
+n_new = 100
+stdErr_new = s_new / sqrt(n_new)
+
+# X
+MWT_old = 6
+s_old = 2
+n_old = 100
+stdErr_old = s_old / sqrt(n_old)
+
+(s_old - s_new) / sqrt(200)
+
+alpha = 0.05
+
+# H0 = descrease in MWT_new
+# 95% 
+
+var.equal = FALSE
+
+Zquartile = qnorm(0.95)
+
+# Using CI = X_bar + stdErr * Zquartile 
+CI = MWT_old-MWT_new + c(-1,1) * (stdErr_old - stdErr_new) * Zquartile
+
+# If the interval contains zero then sometime the old system wait time 
+# would be less than the new system's wait time. This would not be evidence 
+# that the new system is effective
+
+## Q7
+n_pill = 9
+x_pill = -3
+s_pill = 1.5
+stdErr_pill = s_pill / sqrt(n_pill)
+
+n_placebo = 9
+x_placebo = 1 
+s_placebo = 1.8 
+stdErr_placebo = s_placebo / sqrt(n_placebo)
+
+stdErr = (s_pill + s_placebo) / sqrt(n_pill + n_placebo)
+
+# H0 = decrease in treated (pill) group??
+# 90% 
+
+Zquartile = qnorm(0.975)
+
+
+# Using CI = X_bar + stdErr * Zquartile 
+# Pill - Placebo
+CI = x_pill - x_placebo + c(-1,1) * (stdErr_pill - stdErr_placebo) * Zquartile
+(x_pill - x_placebo) + c(-1,1) * stdErr * Zquartile
+CI
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
