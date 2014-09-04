@@ -510,21 +510,236 @@ CI
 
 
 
+# Project notes
+round(t.test(len~supp, paired=FALSE, var.equal=FALSE, conf.level=0.95, data=t05)$conf, 3)
+you can replace “$conf” with “$statistic” or “$p.value”
+
+
+
+## Week 4 Videos
+?power.t.test
+__Uses__
+- Can be used to calculate the power given n, delta, sd, type, and alt
+power.t.test(n = 16, delta = 2/4, sd = 1, type = "one.sample", alt = "one.sided")$power
+
+- can be used to calculate the necessary sample size given power, delta, sd, type, and alt
+power.t.test(power = 0.8, delta = 2/4, sd = 1, type = "one.sample", alt = "one.sided")$n
+
+- can be used to calculate the minimum detectable delta
+power.t.test(power = 0.8, n=100, sd = 1, type = "one.sample", alt = "one.sided")$delta
+
+__Boot Strapping and Jack Knifing__
+The Jack Knife Routine only requires the vector 'x' and the function to be jack knifed e.g. median or mean.
+
+?jackknife
+library(bootstrap)
+temp <- jackknife(x, median) 
+c(temp$jack.bias, temp$jack.se)
+
+__Permutation test for pesticide data__
+data(InsectSprays)
+boxplot(count ~ spray, data = InsectSprays)
+
+subdata <- InsectSprays[InsectSprays$spray %in% c("B", "C"), ]
+y <- subdata$count
+group <- as.character(subdata$spray)
+testStat <- function(w, g) mean(w[g == "B"]) - mean(w[g == "C"]) 
+observedStat <- testStat(y, group)
+permutations <- sapply(1:10000, function(i) testStat(y, sample(group))) 
+observedStat
+
+mean(permutations > observedStat)
+
+### Video 2 - Multiple Comparisons
+p.adjust(pValues, method="bonferroni") 
+
+
+
+## Quiz 4 - Week 4
+
+Q1
+```{r}
+H0 = there was a mean reduction in blood pressure = mu0 > mu
+Ha = there was no mean reduction in blood pressure = mua <= mu
+
+baseline  <-  c(140, 138, 150, 148, 135)
+week2  <-  c(132, 135, 151, 146, 130)
+pressureDelta  <-  baseline - week2
+
+mean_delta = mean(delta)
+
+t.test(pressureDelta, paired=FALSE, var.equal=FALSE, conf.level=0.95)$p.value
+round(
+      t.test(baseline,week2 , paired=TRUE, var.equal=FALSE, conf.level=0.95)$p.value
+      ,3)
+# 0.087
+```
+
+Q2
+```{r}
+# mu0 = ?
+# for H0: mu = mu0
+# Fail to reject Null Hyp, therefore -> mu = mu0, 95% conf
+
+
+X_bar = 1100
+mu = 1100
+s = 30
+n = 9
+TS = (X_bar - mu0) / (s / sqrt(n))
+
+#let 
+alpha = 0.0125
+Z_alpha = qnorm(alpha) 
+Z_alpha
+# Reject Null Hypothesis when
+if ( TS <= Z_alpha ) 'Reject H0' else 'Fail to Reject H0'
+
+
+mu0  <- X_bar - c(-1,1)*( (Z_alpha*s) / sqrt(n) )
+round(mu0,0)
+```
+
+Q3
+```{r}
+n = 4 
+coke = 3
+pepsi = 1
+p_coke = 0.5
+
+choose(n,coke)*p_coke^2 + choose(n,n)*p_coke^2
+
+round(pbinom(2,size=4,prob=0.5, lower.tail=FALSE), 2)
+
+
+```
+
+
+Q4
+```{r}
+# H0: lambda0 = 0.01
+lambda0 = 1/100 = lambda0_1787 = 17.87 per 1787 days
+lambdaA = 10/1787
+n = 10
+mm = 1787/100
+
+?ppois
+round( ppois(9, 17.87 , lower.tail = TRUE), 3)
+
+```
+
+Q5
+```{r}
+n_pill = 9
+n_plac = 9
+
+x_pill = -3
+x_plac = 1
+
+s_pill = 1.5
+s_plac = 1.8
+
+?rnorm
+pill = rnorm(n=9, mean=x_pill, sd=s_pill)
+plac = rnorm(n=9, mean=x_plac, sd=s_plac)
+
+pValue  <- t.test(pill, plac, paired=FALSE, var.equal=FALSE, conf.level=0.95)$p.value
+if(pValue<0.01) 'Less than 0.01' 
+
+```
+
+
+Q6
+```{r}
+n = 9
+CI = 1077 , 1123
+
+mu = 1078
+
+Z = qnorm(0.9)
+
+s = 46 / (Z*2)
+X_bar = 1123 - Z*s
+
+
+mu = 1100
+
+TS = (X_bar - mu0) / (s / sqrt(n))
+
+#let 
+alpha = 0.025  # (two sided 5% hypothesis test) 
+Z_alpha = qnorm(alpha) 
+Z_alpha
+# Reject Null Hypothesis when
+if ( TS <= Z_alpha ) 'Reject H0' else 'Fail to Reject H0'
+
+
+mu0  <- X_bar - c(-1,1)*( (Z_alpha*s) / sqrt(n) )
+round(mu0,0)
+```
+
+Q7
+```{r}
+n=100
+x_bar = 0.01
+s = 0.04
+# power=?
+# H0: mu0 = mu no volume loss
+round(
+      power.t.test(n = 100, delta = 0.01, sd = 0.04, type = "one.sample", alt = "one.sided")$power
+,2)
+
+
+```
+
+Q8 
+```{r}
+using values from above
+
+round(
+      power.t.test(power = 0.9, delta = 0.01, sd = 0.04, type = "one.sample", alt = "one.sided")$n
+,0)
+
+```
+
+
+Q10
+```{r}
+
+n_metro = 288
+x_bar_metro = 44
+s_metro = 12
+
+
+n_gotham = 288
+x_bar_gotham = 42.04
+s_gotham = 12
+
+metro = rnorm(n=n_metro, mean=x_bar_metro, sd=s_metro)
+gotham = rnorm(n=n_gotham, mean=x_bar_gotham, sd=s_gotham)
+
+#?t.test
+pValue  <- t.test(metro, gotham, paired=FALSE, var.equal=FALSE, conf.level=0.95)$p.value
+round(pValue,2)
+
+```
+
+
+
+Q11
+```{r}
+m = 10
+FWER <= 0.05
+alpha = 0.05
+alpha_fwer = alpha / m 
+alpha_fwer
+# All pvalues < alpha_fwer are significant
+
+p.adjust(pValues, method="bonferroni") 
 
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
+```
 
